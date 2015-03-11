@@ -26,46 +26,34 @@
 
 #include "Arduino.h"
 #include "DelayRun.h"
-#include <Task.h>
 
-#define STATE_STARTING 0
-#define STATE_ON_DELAY 1
-
-DelayRun::DelayRun(unsigned long delayMs, boolean (*callback)(Task* task), DelayRun* followedBy)
+DelayRun::DelayRun(unsigned long delayMs, /*TaskCallback *callback,*/ DelayRun* followedBy)
     : Task(delayMs, &(DelayRun::step)) {
-  this->delayMs = delayMs;
-  this->_callback = callback;
   this->followedBy = followedBy;
+  this->_state = STATE_INITED;
 }
 
 void DelayRun::startDelayed() {
   this->_state = STATE_STARTING;
-  this->setPeriodMs(0);
   SoftTimer.add(this);
 }
 
-void DelayRun::step(Task* task) {
+/*static */ void DelayRun::step(Task* task) {
   DelayRun* dr = (DelayRun*)task;
-  if(dr->_state == STATE_STARTING) {
+  if(dr->_state == STATE_STARTING){
     dr->_state = STATE_ON_DELAY;
-    dr->setPeriodMs(dr->delayMs);
-    return; // -- Do not remove me from Timer Manager.
-  } else if(dr->_state == STATE_ON_DELAY) {
-
+  }else if(dr->_state == STATE_ON_DELAY) {
+    //Serial.println(F("onDelay"));
     // -- Remove me from Timer Manager.
     SoftTimer.remove(dr);
+    dr->_state = STATE_INITED;
 
-    boolean retVal;
-    if(dr->_callback != NULL) {
-      retVal = dr->_callback(dr);
-    } else {
-      // -- If no callback was specified, than always start the followedBy task.
-      retVal = true;
-    }
+    boolean retVal = (*dr)();
     if(retVal) {
       if(dr->followedBy != NULL) {
         dr->followedBy->startDelayed();
       }
     }
-  }
+  }else
+    SoftTimer.remove(dr);
 }

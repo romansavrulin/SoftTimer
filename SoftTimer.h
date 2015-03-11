@@ -44,7 +44,7 @@ class SoftTimerClass
     void remove(Task* task);
     
     /**
-     * For internal use only. You do not need to call this function.
+     * call this function in main loop
      */
     void run();
   private:

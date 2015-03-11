@@ -32,6 +32,7 @@
  */
 class Task
 {
+  friend class SoftTimerClass;
   public:
     /**
      * Construct a task with defining a period and a callback handler function.
@@ -47,6 +48,7 @@ class Task
      */
     void setPeriodMs(unsigned long periodMs);
 
+  private:
     /**
      * The timeslot in milliseconds the handler should be called. If the value is near 1 the handler will be called in every loop.
      */
@@ -65,7 +67,6 @@ class Task
      * This member is for internal use only. Do not change!
      */
     Task* nextTask;
-  private:
 };
 
 #endif

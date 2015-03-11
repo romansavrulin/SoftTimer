@@ -27,8 +27,8 @@
 #ifndef DELAYRUN_H
 #define DELAYRUN_H
 
-#include <SoftTimer.h>
-#include <Task.h>
+#include "SoftTimer.h"
+#include "Task.h"
 #include <Arduino.h>
 
 /**
@@ -37,6 +37,12 @@
 class DelayRun : public Task
 {
   public:
+    typedef enum {
+      STATE_INITED,
+      STATE_STARTING,
+      STATE_ON_DELAY
+    }state;
+
     /**
      * Setup a delayed task.
      *  delayMs - The callback will be launched after this amount of milliseconds was passed.
@@ -47,7 +53,7 @@ class DelayRun : public Task
      *  followedBy - If the followedBy was specified, than it will be started when this was finished.
      *   Starting the followedBy can be denied by returning FALSE in the callback.
      */
-    DelayRun(unsigned long delayMs, boolean (*callback)(Task* task), DelayRun* followedBy = NULL);
+    DelayRun(unsigned long delayMs, /*TaskCallback *callback,*/ DelayRun* followedBy = NULL);
 
     /**
       * Register the task, and start waiting for the delayMs to pass.
@@ -56,21 +62,22 @@ class DelayRun : public Task
       */
     void startDelayed();
 
-
-    /**
-     * The time to sleep the task before launching the callback.
-     * Do not set values greater then 4,294,967, which is about 71 minutes!
-     */
-    unsigned long delayMs;
     /** The task should be started after this one was finished. */
     DelayRun* followedBy;
 
+    virtual ~DelayRun() = 0;
+    virtual boolean operator()() = 0;
+
+    state getState(){ return _state; };
+
   private:
-    boolean (*_callback)(Task* task);
+    //TaskCallback *_callback;
     static void step(Task* me);
 
-    byte _state;
+    state _state;
 };
+
+inline DelayRun::~DelayRun() { }
 
 #endif
 

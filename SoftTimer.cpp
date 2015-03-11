@@ -27,14 +27,6 @@
 #include "Arduino.h"
 #include "SoftTimer.h"
 
-/**
- * The main loop is implemented here. You do not ever need to call implement this function
- * if you think in event driven programing.
- */
-void loop() {
-  SoftTimer.run();
-}
-
 
 /**
  * Register a task in the timer manager.
