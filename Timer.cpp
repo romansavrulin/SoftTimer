@@ -37,7 +37,11 @@ void Timer::start() {
   SoftTimer.add(this, false);
 }
 
-void Timer::stop(){
+void Timer::stop(bool launchTask){
+  if(launchTask)
+    step(this);
+
+  // anyway do the following sequence
   this->_state = STATE_STOPPED;
   SoftTimer.remove(this);
 }

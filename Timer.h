@@ -62,7 +62,7 @@ class Timer : public Task
       * Unregister the task, and remove it from the
       * Timer Manager (can also be done with the SoftTimer.remove() function).
       */
-    void stop();
+    void stop(bool launchTask = false);
 
     /**
       * Gets the state of the timer

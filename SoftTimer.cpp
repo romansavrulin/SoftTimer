@@ -31,7 +31,7 @@
 /**
  * Register a task in the timer manager.
  */
-void SoftTimerClass::add(Task* task, boolean startNow) {
+void SoftTimerClass::add(Task* task, bool startNow) {
 
   // -- A task should be registered only once.
   this->remove(task);

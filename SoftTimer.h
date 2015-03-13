@@ -36,7 +36,7 @@ class SoftTimerClass
     /**
      * Register a task in the timer manager.
      */
-    void add(Task* task, boolean startNow = false);
+    void add(Task* task, bool startNow = false);
     
     /**
     * Remove registration of a task in the timer manager.
