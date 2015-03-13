@@ -34,6 +34,7 @@ Timer::Timer(unsigned long delayMs, Timer* nextTask)
 }
 
 void Timer::start() {
+  _state = STATE_RUNNING;
   SoftTimer.add(this, false);
 }
 
