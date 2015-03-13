@@ -36,7 +36,7 @@ class SoftTimerClass
     /**
      * Register a task in the timer manager.
      */
-    void add(Task* task);
+    void add(Task* task, boolean startNow = false);
     
     /**
     * Remove registration of a task in the timer manager.
@@ -46,7 +46,7 @@ class SoftTimerClass
     /**
      * call this function in main loop
      */
-    void run();
+    void loop();
   private:
     void testAndCall(Task* task);
     Task* _tasks;

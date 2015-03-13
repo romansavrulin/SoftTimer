@@ -31,7 +31,7 @@
 /**
  * Register a task in the timer manager.
  */
-void SoftTimerClass::add(Task* task) {
+void SoftTimerClass::add(Task* task, boolean startNow) {
 
   // -- A task should be registered only once.
   this->remove(task);
@@ -53,7 +53,9 @@ void SoftTimerClass::add(Task* task) {
     
   }
   
-  task->lastCallTimeMicros = micros() - task->periodMicros; // -- Start immediately after registering.
+  task->lastCallTimeMicros = micros();
+  if(startNow)
+    task->lastCallTimeMicros -=  task->periodMicros; // -- Start immediately after registering.
   task->nextTask = NULL;
 }
 
@@ -84,7 +86,7 @@ void SoftTimerClass::remove(Task* task) {
 /**
  * Walk through the chain looking for task to call.
  */
-void SoftTimerClass::run() {
+void SoftTimerClass::loop() {
   Task* task = this->_tasks;
   // -- (If this->_tasks is NULL, than nothing is registered.)
   while(task != NULL) {

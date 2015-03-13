@@ -1,11 +1,10 @@
 /**
- * File: DelayRun.h
+ * File: Timer.h
  * Description:
  * SoftTimer library is a lightweight but effective event based timeshare solution for Arduino.
  *
- * Author: Balazs Kelemen
- * Contact: prampec+arduino@gmail.com
- * Copyright: 2012 Balazs Kelemen
+ * Author: Roman Savrulin <romeo.deepmind@gmail.com>, Balazs Kelemen <prampec+arduino@gmail.com>
+ * Copyright: 2014 Roman Savrulin
  * Copying permission statement:
     This file is part of SoftTimer.
 
@@ -24,8 +23,8 @@
 
 */
 
-#ifndef DELAYRUN_H
-#define DELAYRUN_H
+#ifndef SOFT_TIMER_TIMER_H
+#define SOFT_TIMER_TIMER_H
 
 #include "SoftTimer.h"
 #include "Task.h"
@@ -34,50 +33,57 @@
 /**
  * Run a callback after a specified delay. The task will stop when finished. Also chains tasks.
  */
-class DelayRun : public Task
+class Timer : public Task
 {
   public:
     typedef enum {
-      STATE_INITED,
-      STATE_STARTING,
-      STATE_ON_DELAY
+      STATE_STOPPED,
+      STATE_RUNNING
     }state;
 
     /**
      * Setup a delayed task.
-     *  delayMs - The callback will be launched after this amount of milliseconds was passed.
+     *  @param delayMs - The callback will be launched after this amount of milliseconds was passed.
      *    A value zero (0) may also have sense, when you only want to chain tasks.
      *    Do not add values greater then 4,294,967, which is about 71 minutes!
-     *  callback - The function to call after the specified time-span. Optional, may be NULL.
-     *    The return value of the callback controls behavior of the "followedBy" option.
-     *  followedBy - If the followedBy was specified, than it will be started when this was finished.
+     *  @param nextTimer - If the followedBy was specified, than it will be started when this was finished.
      *   Starting the followedBy can be denied by returning FALSE in the callback.
      */
-    DelayRun(unsigned long delayMs, /*TaskCallback *callback,*/ DelayRun* followedBy = NULL);
+    Timer(unsigned long delayMs, Timer* nextTimer = NULL);
 
     /**
       * Register the task, and start waiting for the delayMs to pass.
       * If you need to prevent the task to start, you need to remove it from the
       * Timer Manager (with the SoftTimer.remove() function).
       */
-    void startDelayed();
+    void start();
 
-    /** The task should be started after this one was finished. */
-    DelayRun* followedBy;
+    /**
+      * Unregister the task, and remove it from the
+      * Timer Manager (can also be done with the SoftTimer.remove() function).
+      */
+    void stop();
 
-    virtual ~DelayRun() = 0;
-    virtual boolean operator()() = 0;
+    /**
+      * Gets the state of the timer
+      */
+    bool isRunning() { return _state == STATE_RUNNING; };
+
+
+    virtual ~Timer() = 0;
+    virtual bool operator()() = 0;
 
     state getState(){ return _state; };
 
   private:
-    //TaskCallback *_callback;
+    /** The timer should be started after this one was finished. */
+    Timer* _nextTimer;
     static void step(Task* me);
 
     state _state;
 };
 
-inline DelayRun::~DelayRun() { }
+inline Timer::~Timer() { }
 
 #endif
 

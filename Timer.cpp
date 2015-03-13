@@ -1,11 +1,10 @@
 /**
- * File: DelayRun.cpp
+ * File: Timer.cpp
  * Description:
  * SoftTimer library is a lightweight but effective event based timeshare solution for Arduino.
  *
- * Author: Balazs Kelemen
- * Contact: prampec+arduino@gmail.com
- * Copyright: 2012 Balazs Kelemen
+ * Author: Roman Savrulin <romeo.deepmind@gmail.com>, Balazs Kelemen <prampec+arduino@gmail.com>
+ * Copyright: 2014 Roman Savrulin
  * Copying permission statement:
     This file is part of SoftTimer.
 
@@ -24,34 +23,36 @@
 
 */
 
-#include "Arduino.h"
-#include "DelayRun.h"
+#include "Timer.h"
 
-DelayRun::DelayRun(unsigned long delayMs, /*TaskCallback *callback,*/ DelayRun* followedBy)
-    : Task(delayMs, &(DelayRun::step)) {
-  this->followedBy = followedBy;
-  this->_state = STATE_INITED;
+#include <Arduino.h>
+
+Timer::Timer(unsigned long delayMs, Timer* nextTask)
+    : Task(delayMs, &(Timer::step)) {
+  this->_nextTimer = _nextTimer;
+  this->_state = STATE_STOPPED;
 }
 
-void DelayRun::startDelayed() {
-  this->_state = STATE_STARTING;
-  SoftTimer.add(this);
+void Timer::start() {
+  SoftTimer.add(this, false);
 }
 
-/*static */ void DelayRun::step(Task* task) {
-  DelayRun* dr = (DelayRun*)task;
-  if(dr->_state == STATE_STARTING){
-    dr->_state = STATE_ON_DELAY;
-  }else if(dr->_state == STATE_ON_DELAY) {
-    //Serial.println(F("onDelay"));
+void Timer::stop(){
+  this->_state = STATE_STOPPED;
+  SoftTimer.remove(this);
+}
+
+/*static */ void Timer::step(Task* task) {
+  Timer* dr = (Timer*)task;
+  if(dr->_state == STATE_RUNNING) {
     // -- Remove me from Timer Manager.
     SoftTimer.remove(dr);
-    dr->_state = STATE_INITED;
+    dr->_state = STATE_STOPPED;
 
     boolean retVal = (*dr)();
     if(retVal) {
-      if(dr->followedBy != NULL) {
-        dr->followedBy->startDelayed();
+      if(dr->_nextTimer != NULL) {
+        dr->_nextTimer->start();
       }
     }
   }else
